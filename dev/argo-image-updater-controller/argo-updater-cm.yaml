@@ -8,19 +8,3 @@ data:
     #!/bin/sh
     ACCESS_TOKEN=$(wget --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token -q -O - | grep -Eo '"access_token":.*?[^\\]",' | cut -d '"' -f 4)
     echo "oauth2accesstoken:$ACCESS_TOKEN"
-
-
-
-    gcloud iam workload-identity-pools create "github" \
-  --project="isolution-442111" \
-  --location="global" \
-  --display-name="GitHub Actions Pool"
-
-
-# TODO: replace ${PROJECT_ID} and ${GITHUB_ORG} with your values below.
-
-gcloud iam workload-identity-pools providers describe "my-repo" \
-  --project="isolution-442111" \
-  --location="global" \
-  --workload-identity-pool="github" \
-  --format="value(name)"
