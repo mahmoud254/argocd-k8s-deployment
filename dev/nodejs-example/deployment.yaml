@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: apps
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+        service: backend
+    spec:
+      containers:
+        - name: backend
+          image: us-central1-docker.pkg.dev/isolution-442111/isolution-registry/isolution-backend-dev:c334fcdf5f2aa8cb87c8d21ea099b0c595a0566a
+
+          resources:
+            requests:
+              memory: 0.5Gi
+              cpu: 500m
+            limits:
+              memory: 1.5Gi
+              cpu: 1500m
+          envFrom:
+            - secretRef:
+                name: mysql-secret
+            - secretRef:
+                name: redis-secret                
+          ports:
+            - containerPort: 3000
+              name: http     

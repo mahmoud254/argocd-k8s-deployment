@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argo-image-updater
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    chart: argocd-image-updater
+    repoURL: https://argoproj.github.io/argo-helm
+    targetRevision: 0.11.0
+    helm:
+      releaseName: argocd-image-updater
+      valuesObject:
+        serviceAccount:
+          annotations: 
+            iam.gke.io/gcp-service-account: argocd-image-updater@isolution-442111.iam.gserviceaccount.com
+        config:
+          registries:
+            - name: GCP Artifact Registry
+              api_url: https://us-central1-docker.pkg.dev
+              prefix: us-central1-docker.pkg.dev
+              credentials: ext:/auth/auth.sh
+              credsexpire: 30m
+        volumes:
+        - configMap:
+            defaultMode: 0755
+            name: auth-cm
+          name: auth
+        volumeMounts:
+        - mountPath: /auth
+          name: auth      
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
